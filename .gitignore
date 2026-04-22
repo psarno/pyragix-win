@@ -1,0 +1,63 @@
+# Build outputs
+bin/
+obj/
+publish/
+
+# IDE / Editor
+.vs/
+.vscode/
+*.user
+*.suo
+*.csproj.user
+
+# NuGet
+packages/
+*.nupkg
+
+# OS
+Thumbs.db
+Desktop.ini
+.DS_Store
+
+# WinUI / Windows App SDK generated
+Generated Files/
+*.appx
+*.msix
+*.appxbundle
+*.msixbundle
+*.appxupload
+*.msixupload
+BundleArtifacts/
+
+# Logs and databases
+*.log
+*.db
+*.db-shm
+*.db-wal
+
+# ONNX models and associated tokenizer/vocab files (large, user-supplied)
+*.onnx
+src/PyRagix.Win/Models/embeddings/
+src/PyRagix.Win/Models/reranker/
+
+# Tesseract data
+tessdata/
+
+# FAISS / Lucene indexes
+faiss_index.bin
+lucene_index/
+
+# Secrets / local config overrides
+appsettings.*.json
+!appsettings.json
+.env
+
+# Local NuGet feed config (machine-specific paths)
+nuget.config
+
+# AI Agents
+.claude/
+.grok/
+.codex/
+CLAUDE.md
+AGENTS.md

@@ -1,0 +1,151 @@
+<Page
+    x:Class="PyRagix.Win.Views.ChatPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:models="using:PyRagix.Win.Models"
+    xmlns:local="using:PyRagix.Win.Views"
+    xmlns:ctk="using:CommunityToolkit.WinUI.UI.Controls">
+
+    <Page.Resources>
+        <local:ChatTemplateSelector
+            x:Key="ChatTemplateSelector"
+            UserTemplate="{StaticResource UserMessageTemplate}"
+            AssistantTemplate="{StaticResource AssistantMessageTemplate}" />
+
+        <!-- User message: right-aligned, accent-colored -->
+        <DataTemplate x:Key="UserMessageTemplate" x:DataType="models:ChatMessage">
+            <Grid HorizontalAlignment="Right" MaxWidth="600" Margin="60,4,16,4">
+                <Border
+                    Background="{ThemeResource AccentFillColorDefaultBrush}"
+                    CornerRadius="12,12,4,12"
+                    Padding="14,10">
+                    <TextBlock
+                        Text="{x:Bind Content}"
+                        TextWrapping="Wrap"
+                        Foreground="{ThemeResource TextOnAccentFillColorPrimaryBrush}"
+                        IsTextSelectionEnabled="True" />
+                </Border>
+            </Grid>
+        </DataTemplate>
+
+        <!-- Assistant message: left-aligned, subtle background -->
+        <DataTemplate x:Key="AssistantMessageTemplate" x:DataType="models:ChatMessage">
+            <Grid HorizontalAlignment="Left" MaxWidth="600" Margin="16,4,60,4">
+                <Border
+                    Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                    CornerRadius="12,12,12,4"
+                    Padding="14,10">
+                    <StackPanel Spacing="8">
+
+                        <!-- Thinking block: collapsed by default, hidden when absent -->
+                        <Expander
+                            Header="Thinking..."
+                            IsExpanded="False"
+                            HorizontalAlignment="Stretch"
+                            HorizontalContentAlignment="Stretch"
+                            Visibility="{x:Bind HasThinking, Converter={StaticResource BoolToVisibilityConverter}}">
+                            <TextBlock
+                                Text="{x:Bind ThinkingContent}"
+                                TextWrapping="Wrap"
+                                Opacity="0.65"
+                                Style="{StaticResource CaptionTextBlockStyle}" />
+                        </Expander>
+
+                        <ctk:MarkdownTextBlock
+                            Text="{x:Bind DisplayContent, Converter={StaticResource MarkdownNormalizeConverter}}"
+                            TextWrapping="Wrap"
+                            IsTextSelectionEnabled="True" />
+
+                    </StackPanel>
+                </Border>
+            </Grid>
+        </DataTemplate>
+    </Page.Resources>
+
+    <Grid RowDefinitions="*,Auto">
+
+        <!-- Message list + empty state overlay -->
+        <Grid Grid.Row="0">
+            <ListView
+                x:Name="MessageList"
+                ItemsSource="{x:Bind ViewModel.Messages}"
+                ItemTemplateSelector="{StaticResource ChatTemplateSelector}"
+                SelectionMode="None"
+                Padding="0,12,0,8">
+                <ListView.ItemContainerStyle>
+                    <Style TargetType="ListViewItem">
+                        <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                        <Setter Property="Padding" Value="0" />
+                        <Setter Property="MinHeight" Value="0" />
+                    </Style>
+                </ListView.ItemContainerStyle>
+            </ListView>
+
+            <!-- Empty state -->
+            <StackPanel
+                HorizontalAlignment="Center"
+                VerticalAlignment="Center"
+                Visibility="{x:Bind ViewModel.IsEmpty, Mode=OneWay}">
+                <FontIcon
+                    Glyph="&#xE8BD;"
+                    FontSize="48"
+                    Opacity="0.3"
+                    HorizontalAlignment="Center"
+                    Margin="0,0,0,12" />
+                <TextBlock
+                    Text="Ask a question about your documents"
+                    Style="{StaticResource SubtitleTextBlockStyle}"
+                    Opacity="0.4"
+                    HorizontalAlignment="Center" />
+            </StackPanel>
+        </Grid>
+
+        <!-- Bottom area: error bar + input row -->
+        <StackPanel Grid.Row="1" Padding="16,8,16,16" Spacing="8">
+
+            <InfoBar
+                IsOpen="{x:Bind ViewModel.ErrorMessage, Mode=OneWay, Converter={StaticResource NullToBoolConverter}}"
+                Severity="Error"
+                Title="Error"
+                Message="{x:Bind ViewModel.ErrorMessage, Mode=OneWay}" />
+
+            <Grid ColumnDefinitions="*,Auto">
+                <TextBox
+                    x:Name="QueryBox"
+                    Grid.Column="0"
+                    PlaceholderText="Type your question..."
+                    Text="{x:Bind ViewModel.QueryText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                    AcceptsReturn="False"
+                    KeyDown="QueryBox_KeyDown"
+                    IsEnabled="{x:Bind ViewModel.IsBusy, Mode=OneWay, Converter={StaticResource InvertBoolConverter}}"
+                    VerticalAlignment="Center" />
+
+                <!-- Send button: visible when idle -->
+                <Button
+                    Grid.Column="1"
+                    Command="{x:Bind ViewModel.SendCommand}"
+                    Style="{StaticResource AccentButtonStyle}"
+                    Margin="8,0,0,0"
+                    VerticalAlignment="Center"
+                    ToolTipService.ToolTip="Send (Enter)"
+                    Visibility="{x:Bind ViewModel.IsBusy, Mode=OneWay, Converter={StaticResource InvertBoolToVisibilityConverter}}">
+                    <FontIcon Glyph="&#xE724;" FontSize="16" />
+                </Button>
+
+                <!-- Cancel button: visible while waiting for a response -->
+                <Button
+                    Grid.Column="1"
+                    Command="{x:Bind ViewModel.CancelCommand}"
+                    Margin="8,0,0,0"
+                    VerticalAlignment="Center"
+                    ToolTipService.ToolTip="Cancel"
+                    Visibility="{x:Bind ViewModel.IsBusy, Mode=OneWay}">
+                    <StackPanel Orientation="Horizontal" Spacing="6">
+                        <ProgressRing IsActive="True" Width="16" Height="16" />
+                        <FontIcon Glyph="&#xE711;" FontSize="14" />
+                    </StackPanel>
+                </Button>
+            </Grid>
+        </StackPanel>
+    </Grid>
+</Page>

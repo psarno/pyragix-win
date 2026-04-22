@@ -1,0 +1,62 @@
+# PyRagix.Net Configuration
+# Copy this file to settings.toml and adjust values for your environment.
+# All processing is local — no data leaves your machine.
+
+# ============================================================================
+# PATHS
+# ============================================================================
+EmbeddingModelPath = "./Models/embeddings/model.onnx"
+RerankerModelPath  = "./Models/reranker/model.onnx"
+DatabasePath       = "pyragix.db"
+FaissIndexPath     = "faiss_index.bin"
+LuceneIndexPath    = "lucene_index"
+
+# ============================================================================
+# LLM (any OpenAI-compatible server: llamacpp, KoboldCpp, Ollama, LM Studio, vLLM, LocalAI, etc.)
+# ============================================================================
+LlmEndpoint  = "http://localhost:8080"   # llamacpp default; KoboldCpp=5001, Ollama=11434
+LlmModel     = "qwen2.5:7b"
+LlmTimeout   = 180
+Temperature     = 0.1
+TopP            = 0.9
+MaxTokens       = 500
+
+# ============================================================================
+# RAG FEATURES
+# ============================================================================
+EnableQueryExpansion    = true   # Multi-query generation for better recall
+EnableHybridSearch      = true   # FAISS semantic + Lucene BM25 fusion
+EnableReranking         = true   # Cross-encoder re-scoring
+EnableSemanticChunking  = true   # Sentence-boundary-aware splitting
+
+# ============================================================================
+# PERFORMANCE TUNING
+# ============================================================================
+EmbeddingBatchSize   = 16   # Higher = faster ingestion, more RAM
+EmbeddingDimension   = 384  # Must match exported ONNX model (MiniLM-L6-v2 = 384)
+DefaultTopK          = 7    # Chunks surfaced to the LLM for answer generation
+HybridAlpha          = 0.7  # 0.7 = 70% semantic (FAISS) + 30% keyword (BM25)
+QueryExpansionCount  = 3    # Number of query variants to generate
+RerankTopK           = 20   # Candidates passed to the cross-encoder before pruning to DefaultTopK
+ChunkSize            = 1600 # Max characters per chunk
+ChunkOverlap         = 200  # Overlap between adjacent chunks
+
+# ============================================================================
+# OCR (image and scanned-PDF ingestion via Tesseract)
+# ============================================================================
+OcrBaseDpi = 150   # 100 for memory-constrained systems, 200 for high-quality scans
+OcrMaxDpi  = 300
+
+# ============================================================================
+# GPU / ONNX EXECUTION PROVIDER
+# ============================================================================
+# ExecutionProviderPreference controls how ONNX Runtime picks a compute device
+# for embedding generation and cross-encoder reranking.
+#
+#   Cpu   — CPU only. Safe on any machine. Default.
+#   Auto  — Try CUDA first; silently fall back to CPU if unavailable.
+#   Cuda  — Require CUDA. Fails at startup if CUDA is not available.
+#
+# FAISS vector search is always CPU-only (FaissNet limitation).
+ExecutionProviderPreference = "Cpu"
+GpuDeviceId                 = 0
