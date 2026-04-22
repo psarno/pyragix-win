@@ -19,39 +19,13 @@ Everything runs locally. No cloud APIs, no data leaving your machine.
 1. **Windows 11** (build 22621 or later)
 2. **.NET 10.0 SDK** - [Download here](https://dotnet.microsoft.com/download/dotnet/10.0)
 3. **Visual Studio 2022 or later** with the Windows App SDK workload (for the WinUI 3 build toolchain)
-4. **PyRagix.Net 0.3.2** - see [Dependency Setup](#dependency-setup) below
+4. **PyRagix.Net 0.3.2** - available on [NuGet.org](https://www.nuget.org/packages/PyRagix.Net)
 5. **ONNX models** - see [ONNX Models](#onnx-models) below
 6. **Local LLM server** (any OpenAI-compatible endpoint):
    - [Ollama](https://ollama.com)
    - [LM Studio](https://lmstudio.ai)
    - [llamacpp](https://github.com/ggerganov/llama.cpp) server mode
    - [KoboldCpp](https://github.com/LostRuins/koboldcpp), [vLLM](https://github.com/vllm-project/vllm), [LocalAI](https://github.com/mudler/LocalAI), or any `/v1/chat/completions`-compatible server
-
-## Dependency Setup
-
-PyRagix Win depends on **PyRagix.Net 0.3.2**, which is not yet published to NuGet.org. You need to build it locally and configure a local NuGet feed.
-
-```bash
-# Clone and build pyragix-net alongside this repo
-git clone https://github.com/psarno/pyragix-net.git
-cd pyragix-net
-dotnet build -c Release
-dotnet pack pyragix-net/pyragix-net.csproj -c Release -o D:\localfeed
-```
-
-Then create a `nuget.config` file in the `pyragix-win` repo root pointing at your local feed:
-
-```xml
-<?xml version="1.0" encoding="utf-8"?>
-<configuration>
-  <packageSources>
-    <add key="nuget.org" value="https://api.nuget.org/v3/index.json" protocolVersion="3" />
-    <add key="local" value="D:\localfeed" />
-  </packageSources>
-</configuration>
-```
-
-> `nuget.config` is gitignored because it contains a machine-specific path. Once PyRagix.Net 0.3.2 is on NuGet.org, this step will not be needed.
 
 ## Building
 
